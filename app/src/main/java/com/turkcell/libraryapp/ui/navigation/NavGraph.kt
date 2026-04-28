@@ -6,7 +6,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.halit.ui.screen.auth.RegisterScreen
+// DİKKAT: Importu kendi proje yapına göre güncelledim
+import com.turkcell.libraryapp.ui.screen.RegisterScreen
 import com.turkcell.libraryapp.ui.screen.HomeScreen
 import com.turkcell.libraryapp.ui.screen.LoginScreen
 import com.turkcell.libraryapp.ui.viewmodel.AuthViewModel
@@ -17,12 +18,11 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
     val authViewModel: AuthViewModel = viewModel()
     val bookViewModel: BookViewModel = viewModel()
 
-    // Sadece TEK bir NavHost olmalı
     NavHost(
         navController = navController,
         startDestination = Screen.Login.route
     ) {
-        // GİRİŞ EKRANI
+
         composable(Screen.Login.route) {
             LoginScreen(
                 onNavigateToRegister = { navController.navigate(Screen.Register.route) },
@@ -35,19 +35,23 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
             )
         }
 
-        // KAYIT EKRANI
+        // KAYIT EKRANI (Ödev 1 Burada Çözüldü)
         composable(Screen.Register.route) {
             RegisterScreen(
                 onNavigateToLogin = { navController.navigate(Screen.Login.route) },
+                onRegisterSuccess = {
+
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Register.route) { inclusive = true }
+                    }
+                },
                 authViewModel = authViewModel
             )
         }
 
-        // ANA SAYFA
+
         composable(Screen.Homepage.route) {
             HomeScreen(authViewModel, bookViewModel)
         }
     }
 }
-
-annotation class NavGraph

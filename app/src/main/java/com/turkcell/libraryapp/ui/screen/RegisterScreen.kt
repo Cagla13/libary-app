@@ -1,5 +1,6 @@
-package com.example.halit.ui.screen.auth
+package com.turkcell.libraryapp.ui.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -8,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -19,14 +21,25 @@ import com.turkcell.libraryapp.ui.viewmodel.AuthViewModel
 @Composable
 fun RegisterScreen(
     onNavigateToLogin: () -> Unit,
-    authViewModel: AuthViewModel // ViewModel dışarıdan (NavGraph'tan) geliyor
+    onRegisterSuccess: () -> Unit,
+    authViewModel: AuthViewModel
 ) {
     val authState by authViewModel.authState.collectAsState()
+    val context = LocalContext.current
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var fullName by remember { mutableStateOf("") }
     var studentNo by remember { mutableStateOf("") }
+
+
+    LaunchedEffect(authState) {
+        if (authState is AuthState.Success) {
+            Toast.makeText(context, "Kayıt Başarılı! Giriş yapabilirsiniz.", Toast.LENGTH_SHORT).show()
+            onRegisterSuccess()
+            authViewModel.resetState()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -39,7 +52,8 @@ fun RegisterScreen(
         Text(
             text = "Kayıt Ol",
             fontSize = 26.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -83,7 +97,7 @@ fun RegisterScreen(
         )
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Hata Mesajı Gösterimi
+
         if (authState is AuthState.Error) {
             Text(
                 text = (authState as AuthState.Error).message,
@@ -92,15 +106,19 @@ fun RegisterScreen(
             )
         }
 
-        // Kayıt Butonu
+
         Button(
             onClick = {
-                authViewModel.signUp(
-                    email = email.trim(),
-                    password = password,
-                    fullName = fullName.trim(),
-                    studentNo = studentNo.trim().ifEmpty { null }
-                )
+                if (email.isNotBlank() && password.length >= 6 && fullName.isNotBlank()) {
+                    authViewModel.signUp(
+                        email = email.trim(),
+                        password = password,
+                        fullName = fullName.trim(),
+                        studentNo = studentNo.trim().ifEmpty { null }
+                    )
+                } else {
+                    Toast.makeText(context, "Lütfen tüm zorunlu alanları doldurun (Şifre min 6 hane)", Toast.LENGTH_SHORT).show()
+                }
             },
             modifier = Modifier.fillMaxWidth(),
             enabled = authState !is AuthState.Loading
@@ -112,17 +130,14 @@ fun RegisterScreen(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {
-                Text("Kayıt Ol")
+                Text("Hesap Oluştur")
             }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Giriş Yap'a Yönlendirme Butonu
         TextButton(onClick = { onNavigateToLogin() }) {
             Text("Zaten hesabın var mı? Giriş Yap")
         }
     }
 }
-
-
