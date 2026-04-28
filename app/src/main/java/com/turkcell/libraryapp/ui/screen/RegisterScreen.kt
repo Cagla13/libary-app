@@ -13,20 +13,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.turkcell.libraryapp.ui.viewmodel.AuthState
 import com.turkcell.libraryapp.ui.viewmodel.AuthViewModel
 
 @Composable
 fun RegisterScreen(
+    onNavigateToLogin: () -> Unit,
+    authViewModel: AuthViewModel // ViewModel dışarıdan (NavGraph'tan) geliyor
 ) {
-    val authViewModel: AuthViewModel = viewModel() // Navigasyon ekranına taşı.
     val authState by authViewModel.authState.collectAsState()
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var fullName by remember { mutableStateOf("") }
     var studentNo by remember { mutableStateOf("") }
-
 
     Column(
         modifier = Modifier
@@ -83,6 +83,7 @@ fun RegisterScreen(
         )
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Hata Mesajı Gösterimi
         if (authState is AuthState.Error) {
             Text(
                 text = (authState as AuthState.Error).message,
@@ -91,6 +92,7 @@ fun RegisterScreen(
             )
         }
 
+        // Kayıt Butonu
         Button(
             onClick = {
                 authViewModel.signUp(
@@ -113,10 +115,14 @@ fun RegisterScreen(
                 Text("Kayıt Ol")
             }
         }
+
         Spacer(modifier = Modifier.height(12.dp))
 
-        TextButton(onClick = {}) {
+        // Giriş Yap'a Yönlendirme Butonu
+        TextButton(onClick = { onNavigateToLogin() }) {
             Text("Zaten hesabın var mı? Giriş Yap")
         }
     }
 }
+
+

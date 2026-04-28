@@ -34,4 +34,15 @@ class AuthRepository
             Profile(userId, "student", fullName, studentNo)
         )
     }
+
+    fun getCurrentUserId() : String?
+    {
+        return supabase.auth.currentUserOrNull()?.id;
+    }
+
+    suspend fun getProfile(userId: String): Profile? = runCatching {
+        supabase.postgrest["profiles"]
+            .select { filter { eq("user_id", userId) }  }
+            .decodeSingle<Profile>()
+    }.getOrNull()
 }
