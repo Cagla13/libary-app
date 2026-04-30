@@ -4,11 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.turkcell.libraryapp.data.model.Profile
 import com.turkcell.libraryapp.data.repository.AuthRepository
+import com.turkcell.libraryapp.data.supabase.supabase
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-// Uygulamanın giriş/kayıt durumlarını temsil eden mühürlü sınıf
+// Giriş/Kayıt butonlarının durumunu yönetmek için
 sealed class AuthState {
     object Idle : AuthState()
     object Loading : AuthState()
@@ -16,69 +19,90 @@ sealed class AuthState {
     data class Error(val message: String) : AuthState()
 }
 
+// Splash ekranında uygulamanın nereye gideceğine karar vermek için
+sealed class SessionState {
+    object Initializing : SessionState()
+    object Unauthenticated : SessionState()
+    data class Authenticated(val role: String) : SessionState()
+}
+
 class AuthViewModel : ViewModel() {
     private val repository = AuthRepository()
 
-    // Ekranın dinleyeceği durumlar
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState
 
-    // Giriş yapan kullanıcının profil bilgisi
+    private val _sessionState = MutableStateFlow<SessionState>(SessionState.Initializing)
+    val sessionState: StateFlow<SessionState> = _sessionState
+
     private val _profile = MutableStateFlow<Profile?>(null)
     val profile: StateFlow<Profile?> = _profile
+
+    init {
+
+        observeSession()
+    }
+
+    private fun observeSession() {
+        viewModelScope.launch {
+            supabase.auth.sessionStatus.collect { status ->
+                when (status) {
+                    is SessionStatus.Authenticated -> {
+                        val userId = repository.getCurrentUserId()
+                        if (userId != null) {
+                            val userProfile = repository.getProfile(userId)
+                            _profile.value = userProfile
+
+                            _sessionState.value = SessionState.Authenticated(userProfile?.role ?: "student")
+                        } else {
+                            _sessionState.value = SessionState.Unauthenticated
+                        }
+                    }
+                    SessionStatus.Initializing -> {
+                        _sessionState.value = SessionState.Initializing
+                    }
+                    else -> {
+                        _profile.value = null
+                        _sessionState.value = SessionState.Unauthenticated
+                    }
+                }
+            }
+        }
+    }
 
     fun signIn(email: String, password: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
-
-            // 1. Adım: Kimlik doğrulama (Giriş yap)
             repository.signIn(email, password)
                 .onSuccess {
-                    // 2. Adım: Giriş başarılıysa kullanıcının UID'sini al
-                    val uid = repository.getCurrentUserId()
+                    val userId = repository.getCurrentUserId()
+                    if (userId != null) {
+                        val userProfile = repository.getProfile(userId)
+                        _profile.value = userProfile
 
-                    if (uid != null) {
-                        // 3. Adım: UID ile veritabanından profil bilgilerini çek
-                        val userProfile = repository.getProfile(uid)
-
-                        if (userProfile != null) {
-                            // Her şey başarılı: Profil bulundu ve set edildi
-                            _profile.value = userProfile
-                            _authState.value = AuthState.Success("student")
-                        } else {
-                            // Kullanıcı girişi var ama veritabanında profile satırı yok
-                            _authState.value = AuthState.Error("Profil bilgisi veritabanında bulunamadı.")
-                        }
+                        _authState.value = AuthState.Success(userProfile?.role ?: "student")
                     } else {
-                        _authState.value = AuthState.Error("Kullanıcı kimliği (UID) alınamadı.")
+                        _authState.value = AuthState.Error("Profil verisi alınamadı.")
                     }
                 }
                 .onFailure { ex ->
-                    // Şifre yanlış veya internet yok gibi durumlar
-                    _authState.value = AuthState.Error(ex.message ?: "Giriş işlemi başarısız oldu.")
+                    _authState.value = AuthState.Error(ex.message ?: "Giriş başarısız")
                 }
         }
     }
 
-    fun signUp(
-        email: String,
-        password: String,
-        fullName: String,
-        studentNo: String?
-    ) {
+    fun signUp(email: String, password: String, fullName: String, studentNo: String?) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             repository.signUp(email, password, fullName, studentNo)
                 .onSuccess {
-
                     _authState.value = AuthState.Success("student")
                 }
                 .onFailure { ex ->
-                    _authState.value = AuthState.Error(ex.message ?: "Kayıt işlemi başarısız.")
+                    _authState.value = AuthState.Error(ex.message ?: "Kayıt başarısız")
                 }
         }
     }
-
 
     fun resetState() {
         _authState.value = AuthState.Idle

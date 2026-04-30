@@ -1,9 +1,9 @@
 package com.turkcell.libraryapp.ui.navigation
 
-// Sayfa routelarımın tanımı.
-sealed class Screen(val route: String)
-{
-    object Login : Screen("login")
-    object Register : Screen("register")
-    object Homepage : Screen("homepage")
+// Sayfa rotalarımızın tanımı.
+sealed class Screen(val route: String) {
+    object Login : Screen(route = "login")
+    object Register : Screen(route = "register")
+    object Homepage : Screen(route = "homepage")
+    object Splash : Screen(route = "splash")
 }

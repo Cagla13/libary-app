@@ -6,10 +6,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-// DİKKAT: Importu kendi proje yapına göre güncelledim
 import com.turkcell.libraryapp.ui.screen.RegisterScreen
 import com.turkcell.libraryapp.ui.screen.HomeScreen
 import com.turkcell.libraryapp.ui.screen.LoginScreen
+import com.turkcell.libraryapp.ui.screen.SplashScreen
 import com.turkcell.libraryapp.ui.viewmodel.AuthViewModel
 import com.turkcell.libraryapp.ui.viewmodel.BookViewModel
 
@@ -18,10 +18,29 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
     val authViewModel: AuthViewModel = viewModel()
     val bookViewModel: BookViewModel = viewModel()
 
+
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route
+        startDestination = Screen.Splash.route
     ) {
+
+
+        composable(Screen.Splash.route) {
+            SplashScreen(
+                authViewModel = authViewModel,
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                },
+                onNavigateToHome = { role ->
+                    navController.navigate(Screen.Homepage.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
 
         composable(Screen.Login.route) {
             LoginScreen(
@@ -35,12 +54,11 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
             )
         }
 
-        // KAYIT EKRANI (Ödev 1 Burada Çözüldü)
+
         composable(Screen.Register.route) {
             RegisterScreen(
                 onNavigateToLogin = { navController.navigate(Screen.Login.route) },
                 onRegisterSuccess = {
-
                     navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Register.route) { inclusive = true }
                     }
