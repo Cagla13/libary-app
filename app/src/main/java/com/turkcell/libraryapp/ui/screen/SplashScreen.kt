@@ -18,27 +18,27 @@ fun SplashScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToHome: (String) -> Unit
 ) {
-
+    // ViewModel'deki oturum durumunu takip ediyoruz
     val sessionState by authViewModel.sessionState.collectAsState()
 
-
+    // Durum değiştikçe yönlendirme yapacak olan LaunchedEffect
     LaunchedEffect(sessionState) {
         when (val state = sessionState) {
             is SessionState.Authenticated -> {
-
+                // Eğer giriş yapılmışsa direkt ana sayfaya git
                 onNavigateToHome(state.role)
             }
             is SessionState.Unauthenticated -> {
-
+                // Giriş yapılmamışsa login ekranına git
                 onNavigateToLogin()
             }
             is SessionState.Initializing -> {
-
+                // Henüz kontrol ediliyor, hiçbir şey yapma (Splash'ta kal)
             }
         }
     }
 
-
+    // Splash Ekranı Görseli (Loading)
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center

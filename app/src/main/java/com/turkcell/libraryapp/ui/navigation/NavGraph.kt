@@ -18,13 +18,13 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
     val authViewModel: AuthViewModel = viewModel()
     val bookViewModel: BookViewModel = viewModel()
 
-
+    // Başlangıç noktası artık Splash ekranı
     NavHost(
         navController = navController,
         startDestination = Screen.Splash.route
     ) {
 
-
+        // SPLASH EKRANI: Oturum kontrolü burada yapılır
         composable(Screen.Splash.route) {
             SplashScreen(
                 authViewModel = authViewModel,
@@ -41,7 +41,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
             )
         }
 
-
+        // GİRİŞ EKRANI
         composable(Screen.Login.route) {
             LoginScreen(
                 onNavigateToRegister = { navController.navigate(Screen.Register.route) },
@@ -54,7 +54,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
             )
         }
 
-
+        // KAYIT EKRANI
         composable(Screen.Register.route) {
             RegisterScreen(
                 onNavigateToLogin = { navController.navigate(Screen.Login.route) },
@@ -67,7 +67,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
             )
         }
 
-
+        // ANASAYFA
         composable(Screen.Homepage.route) {
             HomeScreen(authViewModel, bookViewModel)
         }

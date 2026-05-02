@@ -39,7 +39,7 @@ class AuthViewModel : ViewModel() {
     val profile: StateFlow<Profile?> = _profile
 
     init {
-
+        // Uygulama her açıldığında (Splash Screen aşaması)
         observeSession()
     }
 
@@ -52,7 +52,7 @@ class AuthViewModel : ViewModel() {
                         if (userId != null) {
                             val userProfile = repository.getProfile(userId)
                             _profile.value = userProfile
-
+                            // Rol varsa onu gönderiyoruz, yoksa default "student"
                             _sessionState.value = SessionState.Authenticated(userProfile?.role ?: "student")
                         } else {
                             _sessionState.value = SessionState.Unauthenticated
@@ -79,7 +79,7 @@ class AuthViewModel : ViewModel() {
                     if (userId != null) {
                         val userProfile = repository.getProfile(userId)
                         _profile.value = userProfile
-
+                        // Giriş başarılı olunca role göre UI'ı tetikle
                         _authState.value = AuthState.Success(userProfile?.role ?: "student")
                     } else {
                         _authState.value = AuthState.Error("Profil verisi alınamadı.")
