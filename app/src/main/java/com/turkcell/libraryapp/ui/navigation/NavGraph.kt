@@ -6,10 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.turkcell.libraryapp.ui.screen.RegisterScreen
-import com.turkcell.libraryapp.ui.screen.HomeScreen
-import com.turkcell.libraryapp.ui.screen.LoginScreen
-import com.turkcell.libraryapp.ui.screen.SplashScreen
+import com.turkcell.libraryapp.ui.screen.* // Tüm ekranları kapsar
 import com.turkcell.libraryapp.ui.viewmodel.AuthViewModel
 import com.turkcell.libraryapp.ui.viewmodel.BookViewModel
 
@@ -18,13 +15,11 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
     val authViewModel: AuthViewModel = viewModel()
     val bookViewModel: BookViewModel = viewModel()
 
-    // Başlangıç noktası artık Splash ekranı
     NavHost(
         navController = navController,
         startDestination = Screen.Splash.route
     ) {
-
-        // SPLASH EKRANI: Oturum kontrolü burada yapılır
+        // SPLASH EKRANI
         composable(Screen.Splash.route) {
             SplashScreen(
                 authViewModel = authViewModel,
@@ -33,7 +28,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
                 },
-                onNavigateToHome = { role ->
+                onNavigateToHome = {
                     navController.navigate(Screen.Homepage.route) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
@@ -45,7 +40,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
         composable(Screen.Login.route) {
             LoginScreen(
                 onNavigateToRegister = { navController.navigate(Screen.Register.route) },
-                onLoginSuccess = { role ->
+                onLoginSuccess = {
                     navController.navigate(Screen.Homepage.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
@@ -69,7 +64,33 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
 
         // ANASAYFA
         composable(Screen.Homepage.route) {
-            HomeScreen(authViewModel, bookViewModel)
+            HomeScreen(
+                authViewModel = authViewModel,
+                bookViewModel = bookViewModel,
+                onNavigateToBorrows = {
+                    navController.navigate(Screen.MyBorrows.route)
+                }
+            )
+        }
+
+        // KİRALAMALARIM SAYFASI
+        composable(Screen.MyBorrows.route) {
+            MyBorrowsScreen(
+                authViewModel = authViewModel,
+                bookViewModel = bookViewModel,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
+}
+
+@Composable
+fun MyBorrowsScreen(
+    authViewModel: AuthViewModel,
+    bookViewModel: BookViewModel,
+    onBackClick: () -> Boolean
+) {
+    TODO("Not yet implemented")
 }
