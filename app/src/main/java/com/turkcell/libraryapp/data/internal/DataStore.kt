@@ -8,18 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 
-// DataStore -> Google'ın SharedPref yerine önerdiği modern veri saklama API'ı.
 
-// İki çeşit:
-
-// Preferences Data Store -> SharedPref gibi key-value (modern hali)
-// Proto DataStore -> Typed saklama. Karmaşık objeler için ideal.
-
-// Asenkron -> Tüm okuma/yazma işlemleri suspend
-// Coroutine + Flow Uyumlu -> Değer değişince UI otomatik güncellenebilir.
-// Hata Yönetimi
-
-// HASSAS VERİ TUTMA -> Encrypted bazı çözümler..
 
 private val Context.dataStore by preferencesDataStore(name="ayarlar")
 
