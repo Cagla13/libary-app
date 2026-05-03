@@ -85,7 +85,8 @@ fun HomeScreen(
                         items(books) { book ->
                             BookItem(
                                 book = book,
-                                onBookClick = { /* Detay yönlendirmesi buraya */ }
+                                onBookClick = { /* Detay yönlendirmesi buraya */ },
+                                onBorrowClick = TODO()
                             )
                         }
                     }
