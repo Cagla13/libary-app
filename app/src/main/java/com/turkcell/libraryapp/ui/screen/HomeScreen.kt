@@ -4,12 +4,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List // Güncel ikon paketi
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue // 'Property delegate' hatasını bu çözer
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -28,7 +28,6 @@ fun HomeScreen(
     val isLoading by bookViewModel.isLoading.collectAsState()
     val error by bookViewModel.error.collectAsState()
 
-    // DÜZELTME: AuthViewModel'de 'currentUser' yerine 'profile' kullanıyoruz
     val userProfile by authViewModel.profile.collectAsState()
 
     Scaffold(
@@ -90,9 +89,9 @@ fun HomeScreen(
                                 book = book,
                                 onBookClick = { /* Detay yönlendirmesi */ },
                                 onBorrowClick = { selectedBook ->
-                                    // Profile nesnesi varsa içindeki ID ile ödünç alma işlemini başlat
+
                                     userProfile?.let { p ->
-                                        // Not: Profile modelinde 'id' alanı olduğundan emin ol
+
                                         bookViewModel.borrowBook(selectedBook, p.userId)
                                     }
                                 }

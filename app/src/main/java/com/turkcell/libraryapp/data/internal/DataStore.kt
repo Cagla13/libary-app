@@ -16,7 +16,7 @@ class ThemePref2(private val context: Context) {
 
     private val keyLightMode = booleanPreferencesKey("light_mode")
 
-    // collectAsState()
+
     val lightThemeFlow: Flow<Boolean> = context.dataStore.data.map { prefs -> prefs[keyLightMode] ?: true}
 
     suspend fun saveTheme(lightMode: Boolean)

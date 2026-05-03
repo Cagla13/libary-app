@@ -9,15 +9,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
-import java.util.UUID
+import java.util.*
 
 class BookViewModel : ViewModel() {
     private val repository = BookRepository()
 
     private val _books = MutableStateFlow<List<Book>>(emptyList())
     val books: StateFlow<List<Book>> = _books
+
+
+    private val _myBorrows = MutableStateFlow<List<BorrowRecord>>(emptyList())
+    val myBorrows: StateFlow<List<BorrowRecord>> = _myBorrows
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -28,6 +30,7 @@ class BookViewModel : ViewModel() {
     init {
         loadBooks()
     }
+
 
     fun loadBooks() {
         viewModelScope.launch {
@@ -46,19 +49,36 @@ class BookViewModel : ViewModel() {
         }
     }
 
-    // Ödev 2: Ödünç Alma Fonksiyonu (API 24 Uyumlu)
+
+    fun loadMyBorrows(studentId: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+
+            repository.getStudentBorrowRecords(studentId)
+                .onSuccess { records ->
+                    _myBorrows.value = records
+                }
+                .onFailure {
+                    _error.value = "Kiralama geçmişi yüklenemedi: ${it.message}"
+                }
+            _isLoading.value = false
+        }
+    }
+
+
     fun borrowBook(book: Book, studentId: String) {
         viewModelScope.launch {
             _isLoading.value = true
 
-            // ISO 8601 formatı için SimpleDateFormat (API 24 uyumlu)
+
             val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
             val calendar = Calendar.getInstance()
 
-            // Şu anki zaman (Borrowed At)
+
             val borrowedAt = sdf.format(calendar.time)
 
-            // 5 Gün sonrası (Due Date)
+
             calendar.add(Calendar.DAY_OF_YEAR, 5)
             val dueDate = sdf.format(calendar.time)
 
@@ -73,10 +93,29 @@ class BookViewModel : ViewModel() {
 
             repository.borrowBook(record)
                 .onSuccess {
-                    loadBooks() // UI'daki stok miktarını güncellemek için tekrar yükle
+                    loadBooks()
                 }
                 .onFailure {
                     _error.value = "Ödünç alma başarısız: ${it.message}"
+                }
+            _isLoading.value = false
+        }
+    }
+
+
+    fun returnBook(record: BorrowRecord) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+
+            repository.returnBook(record.id, record.bookId)
+                .onSuccess {
+
+                    loadBooks()
+                    loadMyBorrows(record.studentId)
+                }
+                .onFailure {
+                    _error.value = "Kitap iade edilemedi: ${it.message}"
                 }
             _isLoading.value = false
         }

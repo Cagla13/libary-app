@@ -6,7 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.turkcell.libraryapp.ui.screen.* // Tüm ekranları kapsar
+import com.turkcell.libraryapp.ui.screen.*
 import com.turkcell.libraryapp.ui.viewmodel.AuthViewModel
 import com.turkcell.libraryapp.ui.viewmodel.BookViewModel
 
@@ -19,7 +19,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
         navController = navController,
         startDestination = Screen.Splash.route
     ) {
-        // SPLASH EKRANI
+
         composable(Screen.Splash.route) {
             SplashScreen(
                 authViewModel = authViewModel,
@@ -36,7 +36,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
             )
         }
 
-        // GİRİŞ EKRANI
+
         composable(Screen.Login.route) {
             LoginScreen(
                 onNavigateToRegister = { navController.navigate(Screen.Register.route) },
@@ -49,7 +49,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
             )
         }
 
-        // KAYIT EKRANI
+
         composable(Screen.Register.route) {
             RegisterScreen(
                 onNavigateToLogin = { navController.navigate(Screen.Login.route) },
@@ -62,7 +62,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
             )
         }
 
-        // ANASAYFA
+
         composable(Screen.Homepage.route) {
             HomeScreen(
                 authViewModel = authViewModel,
@@ -73,7 +73,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
             )
         }
 
-        // KİRALAMALARIM SAYFASI
+
         composable(Screen.MyBorrows.route) {
             MyBorrowsScreen(
                 authViewModel = authViewModel,
@@ -93,4 +93,8 @@ fun MyBorrowsScreen(
     onBackClick: () -> Boolean
 ) {
     TODO("Not yet implemented")
+}
+
+class NavGraph {
+
 }
